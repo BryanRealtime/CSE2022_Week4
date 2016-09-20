@@ -1,0 +1,4 @@
+﻿  main.cpp
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+  OpenGLTest.vcxproj -> c:\users\bernium\documents\visual studio 2015\Projects\OpenGLTest\Debug\OpenGLTest.exe
+  OpenGLTest.vcxproj -> c:\users\bernium\documents\visual studio 2015\Projects\OpenGLTest\Debug\OpenGLTest.pdb (Full PDB)
