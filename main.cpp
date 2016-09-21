@@ -43,14 +43,39 @@ void drawOnPixelBuffer()
 	const int i = rand() % width, j = rand() % height;
 	drawPixel(i, j, 0.0f, 0.0f, 0.0f);
 
+	const int i0 = 10, i1 = 200;
+	const int j0 = 10, j1 = 200;
+
+
+}
+
+void drawBoldLine()
+{
+	//std::memset(pixels, 1.0f, sizeof(float)*width*height * 3); // doesn't work
+	std::fill_n(pixels, width*height * 3, 1.0f);	// white background
+
+													//for (int i = 0; i<width*height; i++) {
+													//	pixels[i * 3 + 0] = 1.0f; // red 
+													//	pixels[i * 3 + 1] = 1.0f; // green
+													//	pixels[i * 3 + 2] = 1.0f; // blue
+													//}
+
+	//const int i = 0, j = 0;
+	//drawPixel(i, j, 0.0f, 0.0f, 0.0f);
+
 	// drawing a line
 	//TODO: anti-aliasing
-	const int i0 = 100, i1 = 200;
-	const int j0 = 50, j1 = 80;
+	const int i0 = 10, i1 = 200;
+	const int j0 = 10, j1 = 200;
+	
+	//bold line
 	drawLine(i0, j0, i1, j1, 1.0f, 0.0f, 0.0f);
-
-	//TODO: try moving object
+	drawLine(i0, j0+1, i1, j1+1, 1.0f, 0.0f, 0.0f);
+	drawLine(i0-1, j0 + 1, i1-1, j1 + 1, 1.0f, 0.0f, 0.0f);
+	
 }
+
+
 
 int main(void)
 {
@@ -61,7 +86,7 @@ int main(void)
 		return -1;
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(width, height, "Hello World", NULL, NULL);
+	window = glfwCreateWindow(width, height, "MY FIRST GL", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -78,7 +103,13 @@ int main(void)
 		/* Render here */
 		//glClear(GL_COLOR_BUFFER_BIT);
 
-		drawOnPixelBuffer();
+		//drawOnPixelBuffer();
+
+		drawBoldLine();
+		
+
+
+	
 
 		//TODO: RGB struct
 		//Make a pixel drawing function
