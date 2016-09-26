@@ -1,16 +1,164 @@
-#include <GLFW/glfw3.h>
-#include <cstring>
-#include <stdlib.h>		  // srand, rand
-#include <thread>         // std::this_thread::sleep_for
-#include <chrono>         // std::chrono::seconds
-#include "math.h"
+#include "draw.h"
+#include <iostream>
 
-const int width = 1024;
-const int height = 768;
+int main(void)
+{
+	GLFWwindow* window;
+	/* Initialize the library */
+	if (!glfwInit())
+		return -1;
 
-double x_pos, y_pos;
+	/* Create a windowed mode window and its OpenGL context */
+	window = glfwCreateWindow(width, height, "ICON WORLD!", NULL, NULL);
+	if (!window)
+	{
+		glfwTerminate();
+		return -1;
+	}
 
-float* pixels = new float[width*height * 3];
+	//cursor position callback
+	//glfwSetCursorPosCallback(window, cursorPositionCallBack);
+
+	/* Make the window's context current */
+	glfwMakeContextCurrent(window);
+	glClearColor(1, 1, 1, 1); // while background
+
+	//make Icon and set Coordinates
+	Icon line, X, circ, squa, A;
+	Icon up, down, right, left, vert;
+
+	line.SetIconCoordinates(100, 650, 50, 3);
+	circ.SetIconCoordinates(250, 650, 50, 3);
+	squa.SetIconCoordinates(400, 650, 50, 3);
+	X.SetIconCoordinates(550, 650, 50, 3);
+	A.SetIconCoordinates(700, 650, 50, 3);
+
+	up.SetIconCoordinates(100, 450, 50, 3);
+	down.SetIconCoordinates(250, 450, 50, 3);
+	right.SetIconCoordinates(400, 450, 50, 3);
+	left.SetIconCoordinates(550, 450, 50, 3);
+	vert.SetIconCoordinates(700, 450, 50, 3);
+
+	/* Loop until the user closes the window */
+	while (!glfwWindowShouldClose(window))
+	{
+
+		//get cursor position
+		glfwGetCursorPos(window, &cursor_x, &cursor_y);
+		cursor_y = height - cursor_y; // this is because GetCursorPos's y coordinates is inverted.
+
+		drawOnPixelBuffer();
+
+
+		//draw icons
+		//first top row
+		drawLineICON(line);
+		drawCirclularICON(circ);
+		drawSquareICON(squa);
+		drawXICON(X);
+		drawVerticalICON(vert);
+		
+
+		//second bottom row
+		drawDownICON(down);
+		drawUpICON(up);
+		drawRightICON(right);
+		drawLeftICON(left);
+		drawAICON(A);
+
+
+		glDrawPixels(width, height, GL_RGB, GL_FLOAT, pixels);
+		/* Swap front and back buffers */
+		glfwSwapBuffers(window);
+		/* Poll for and process events */
+		glfwPollEvents();
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+
+	glfwTerminate();
+
+	delete[] pixels; // or you may reuse pixels array 
+
+	return 0;
+}
+
+void Icon::setAreaArray(int x, int y)
+{
+	coordinates[(x + width* y) * 2 + 0] = (float)x;
+	coordinates[(x + width* y) * 2 + 1] = (float)y;
+}
+
+void Icon::initAreaArray()
+{
+	for (int a = 0; a < width; a++)
+	{
+		for (int b = 0; b < height; b++)
+		{
+
+			const int _x = c_x, _y = c_y;
+			const int _r = c_r;
+			const int _w = c_w;
+
+			//if in circle,
+			if (sqrt((_x - a)*(_x - a) + (_y - b)*(_y - b)) <= _r)
+			{
+				//save the coordinates
+				setAreaArray(a, b);
+			}
+		}
+	}
+}
+
+void Icon::SetIconCoordinates(const int x, const int y, const int r, const int w)
+{
+	c_x = x;
+	c_y = y;
+	c_r = r;
+	c_w = w;
+}
+
+float Icon::PullAreaX(int x, int y) const
+{
+	return coordinates[(x + width* y) * 2 + 0];
+}
+
+float Icon::PullAreaY(int x, int y) const
+{
+	return coordinates[(x + width* y) * 2 + 1];
+}
+
+
+int Icon::PullIconX() const
+{
+	return c_x;
+}
+
+int Icon::PullIconY() const
+{
+	return c_y;
+}
+
+int Icon::PullIconR() const
+{
+	return c_r;
+}
+
+int Icon::PullIconW() const
+{
+	return c_w;
+}
+
+
+//this function is not used yet. Shows current cursor's coordinates
+static void cursorPositionCallBack(GLFWwindow *window, double xPos, double yPos)
+{
+	cursor_x = xPos;
+	cursor_y = height - yPos; // because CursorPosition's  y coordinates is inverted! (the most upper y is considered 0)
+
+	std::cout << cursor_x << " " << cursor_y << std::endl;
+}
+
 
 void drawPixel(const int& i, const int& j, const float& red, const float& green, const float& blue)
 {
@@ -18,6 +166,24 @@ void drawPixel(const int& i, const int& j, const float& red, const float& green,
 	pixels[(i + width* j) * 3 + 1] = green;
 	pixels[(i + width* j) * 3 + 2] = blue;
 }
+
+//determine if the coordinates matches the Circle Icon's inside area
+void checkIconArea(Icon icon)
+{
+	for (int a = 0; a < width; a++)
+	{
+		for (int b = 0; b < height; b++)
+		{
+			float icon_x = icon.PullAreaX(a, b);
+			float icon_y = icon.PullAreaY(a, b);
+			if (icon_x == cursor_x
+				&& icon_y == cursor_y)
+				//if coordinates matches, convert the outer circle color to blue
+				drawCircle(icon.PullIconX(), icon.PullIconY(), icon.PullIconR(), icon.PullIconW(), 0.0f, 0.0f, 1.0f);
+		}
+	}
+}
+
 
 // scratched from https://courses.engr.illinois.edu/ece390/archive/archive-f2000/mp/mp4/anti.html
 // see 'Rasterization' part.
@@ -39,11 +205,11 @@ void drawOnPixelBuffer()
 	//std::memset(pixels, 1.0f, sizeof(float)*width*height * 3); // doesn't work
 	std::fill_n(pixels, width*height * 3, 1.0f);	// white background
 
-	//for (int i = 0; i<width*height; i++) {
-	//	pixels[i * 3 + 0] = 1.0f; // red 
-	//	pixels[i * 3 + 1] = 1.0f; // green
-	//	pixels[i * 3 + 2] = 1.0f; // blue
-	//}
+													//for (int i = 0; i<width*height; i++) {
+													//	pixels[i * 3 + 0] = 1.0f; // red 
+													//	pixels[i * 3 + 1] = 1.0f; // green
+													//	pixels[i * 3 + 2] = 1.0f; // blue
+													//}
 
 	const int i = rand() % width, j = rand() % height;
 	drawPixel(i, j, 0.0f, 0.0f, 0.0f);
@@ -54,138 +220,257 @@ void drawOnPixelBuffer()
 }
 
 //w is the width of the circle'outer shell
-void drawCircle(const int x1, const int y1, const int r1, const int w)
+void drawCircle(const int x, const int y, const int r, const int w, const float red, const float green, const float blue)
 {
 	for (int a = 0; a < width; a++)
-
 	{
-
 		for (int b = 0; b < height; b++)
-
 		{
 
-			const int c1 = x1, c2 = y1;
+			const int _x = x, _y = y;
+			const int _r = r;
+			const int _w = w;
 
-			const int r = r1;
-
-			const int line_width = w;
-
-			if (sqrt((c1 - a)*(c1 - a) + (c2 - b)*(c2 - b)) <= r && sqrt((c1 - a)*(c1 - a) + (c2 - b)*(c2 - b)) >= r - line_width)
-
-				drawPixel(a, b, 1.0f, 0.0f, 0.0f);
-
+			if (sqrt((_x - a)*(_x - a) + (_y - b)*(_y - b)) <= _r)
+			{
+				if (sqrt((_x - a)*(_x - a) + (_y - b)*(_y - b)) >= _r - _w)
+					drawPixel(a, b, red, green, blue);
+			}
 		}
-
 	}
 }
 
-bool IsCursorInIcon(GLFWwindow *window)
+void drawLineICON(Icon icon)
 {
-	glfwGetCursorPos(window, &x_pos, &y_pos);
-	//DrawCircle 활용하여 범위 계산해서 true 이면 색변경 , else false
+	//initialize saving icon area's coordinates in array
+	icon.initAreaArray();
+
+	//get icon's x,y,r,w info
+	const int x = icon.PullIconX();
+	const int y = icon.PullIconY();
+	const int r = icon.PullIconR();
+	const int w = icon.PullIconW();
+
+	//draw outer circle
+	drawCircle(x, y, r, w, 1.0f, 0.0f, 0.0f);
+
+	//draw inner Line mark
+	for (int i = 0; i < 5; i++) {
+		drawLine((x - (r / 2)) - i, (y - (r / 2)) + i, (x + (r / 2)) - i, (y + (r / 2)) + i, 1.0f, 0.0f, 0.0f);
+	}
+
+	//check if the cursor is inside the icon area
+	checkIconArea(icon);
 }
 
-void icon_1()
+void drawXICON(Icon icon)
 {
-		drawCircle(100, 150, 50, 3);
-		for (int i = 0; i < 8; i++) {
-			drawLine(75 - i,  115+ i, 135 - i, 170 + i, 1.0f, 0.0f, 0.0f);
-			
-		}
+	//initialize saving icon area's coordinates in array
+	icon.initAreaArray();
 
+	//get icon's x,y,r,w info
+	const int x = icon.PullIconX();
+	const int y = icon.PullIconY();
+	const int r = icon.PullIconR();
+	const int w = icon.PullIconW();
 
+	//draw outer circle
+	drawCircle(x, y, r, w, 1.0f, 0.0f, 0.0f);
+
+	//draw inner X mark
+	for (int i = 0; i < 5; i++) {
+		drawLine((x - (r / 2)) - i, (y - (r / 2)) + i, (x + (r / 2)) - i, (y + (r / 2)) + i, 1.0f, 0.0f, 0.0f);
+		drawLine((x - (r / 2)) + i, (y + (r / 2)) + i, (x + (r / 2)) + i, (y - (r / 2)) + i, 1.0f, 0.0f, 0.0f);
+	}
+
+	//check if the cursor is inside the icon area
+	checkIconArea(icon);
 }
 
+void drawCirclularICON(Icon icon)
+{
+	//initialize saving icon area's coordinates in array
+	icon.initAreaArray();
 
+	//get icon's x,y,r,w info
+	const int x = icon.PullIconX();
+	const int y = icon.PullIconY();
+	const int r = icon.PullIconR();
+	const int w = icon.PullIconW();
 
-	int main(void)
-	{
-		GLFWwindow* window;
+	//draw outer circle
+	drawCircle(x, y, r, w, 1.0f, 0.0f, 0.0f);
 
-		/* Initialize the library */
-		if (!glfwInit())
-			return -1;
+	//draw inner circle (more bold width, smaller the radius)
+	drawCircle(x, y, (2 * r / 5), w + 4, 1.0f, 0.0f, 0.0f);
 
-		/* Create a windowed mode window and its OpenGL context */
-		window = glfwCreateWindow(width, height, "Hello World", NULL, NULL);
-		if (!window)
-		{
-			glfwTerminate();
-			return -1;
-		}
+	//check if the cursor is inside the icon area
+	checkIconArea(icon);
+}
 
-		/* Make the window's context current */
-		glfwMakeContextCurrent(window);
-		glClearColor(1, 1, 1, 1); // while background
+void drawSquareICON(Icon icon)
+{
 
-		/* Loop until the user closes the window */
-		while (!glfwWindowShouldClose(window))
-		{
-			/* Render here */
-			//glClear(GL_COLOR_BUFFER_BIT);
+	//initialize saving icon area's coordinates in array
+	icon.initAreaArray();
 
-			drawOnPixelBuffer();
+	//get icon's x,y,r,w info
+	const int x = icon.PullIconX();
+	const int y = icon.PullIconY();
+	const int r = icon.PullIconR();
+	const int w = icon.PullIconW();
 
+	//draw outer circle
+	drawCircle(x, y, r, w, 1.0f, 0.0f, 0.0f);
 
-			icon_1();
+	//draw inner Square
+	drawLine((x - (r / 2)), (y - (r / 2)), (x - (r / 2)), (y + (r / 2)), 1.0f, 0.0f, 0.0f);
+	drawLine((x - (r / 2)), (y - (r / 2)), (x + (r / 2)), (y - (r / 2)), 1.0f, 0.0f, 0.0f);
+	drawLine((x - (r / 2)), (y + (r / 2)), (x + (r / 2)), (y + (r / 2)), 1.0f, 0.0f, 0.0f);
+	drawLine((x + (r / 2)), (y - (r / 2)), (x + (r / 2)), (y + (r / 2)), 1.0f, 0.0f, 0.0f);
 
-			/*
-			// thicker line
-			for (int i = 0; i < 10; i++) {
-				drawLine(100-i, 400 + i, 200-i, 400 + i, 1.0f, 0.0f, 0.0f);
-			}
+	//check if the cursor is inside the icon area
+	checkIconArea(icon);
+}
 
+void drawDownICON(Icon icon)
+{
 
+	//initialize saving icon area's coordinates in array
+	icon.initAreaArray();
 
-			// square
-			drawLine(300, 400, 400, 400, 1.0f, 0.0f, 0.0f);
-			drawLine(300, 400, 300, 500, 1.0f, 0.0f, 0.0f);
-			drawLine(300, 500, 400, 500, 1.0f, 0.0f, 0.0f);
-			drawLine(400, 400, 400, 500, 1.0f, 0.0f, 0.0f);
+	//get icon's x,y,r,w info
+	const int x = icon.PullIconX();
+	const int y = icon.PullIconY();
+	const int r = icon.PullIconR();
+	const int w = icon.PullIconW();
 
+	//draw outer circle
+	drawCircle(x, y, r, w, 1.0f, 0.0f, 0.0f);
 
-			// square(filled with a non-white color)
-			for (int j = 400; j < 500; j++) {
-				drawLine(500, j, 600, j, 1.0f, 0.0f, 0.0f);
-			}
+	//draw down arrow
+	drawLine(x, (y - (r / 2)), x, (y + (r / 2)), 1.0f, 0.0f, 0.0f);
+	drawLine(x, (y - (r / 2)), (x + (r / 4)), (y - (r / 4)), 1.0f, 0.0f, 0.0f);
+	drawLine(x - (r / 4), (y - (r / 4)), x, (y - (r / 2)), 1.0f, 0.0f, 0.0f);
 
-			// triangle
-			drawLine(100, 200, 200, 200, 1.0f, 0.0f, 0.0f);
-			for (int i = 0; i < 3; i++) {
-				drawLine(100, 200 + i, 150, 300 + i, 1.0f, 0.0f, 0.0f);
-				drawLine(150, 300 + i, 200, 200 + i, 1.0f, 0.0f, 0.0f);
-			}
+	//check if the cursor is inside the icon area
+	checkIconArea(icon);
+}
 
-			//Pentagon
-			drawLine(320, 200, 370, 200, 1.0f, 0.0f, 0.0f);
-			for (int i = 0; i < 2; i++) {
-				drawLine(290, 240 + i, 320, 200 + i, 1.0f, 0.0f, 0.0f);
-				drawLine(290, 240 + i, 340, 280 + i, 1.0f, 0.0f, 0.0f);
-				drawLine(340, 280 + i, 390, 240 + i, 1.0f, 0.0f, 0.0f);
-				drawLine(370, 200 + i, 390, 240 + i, 1.0f, 0.0f, 0.0f);
-			}
+void drawUpICON(Icon icon)
+{
 
-			*/
+	//initialize saving icon area's coordinates in array
+	icon.initAreaArray();
 
+	//get icon's x,y,r,w info
+	const int x = icon.PullIconX();
+	const int y = icon.PullIconY();
+	const int r = icon.PullIconR();
+	const int w = icon.PullIconW();
 
-			//TODO: RGB struct
-			//Make a pixel drawing function
-			//Make a line drawing function
+	//draw outer circle
+	drawCircle(x, y, r, w, 1.0f, 0.0f, 0.0f);
 
-			glDrawPixels(width, height, GL_RGB, GL_FLOAT, pixels);
+	//draw upper arrow
+	drawLine(x, (y - (r / 2)), x, (y + (r / 2)), 1.0f, 0.0f, 0.0f);
+	drawLine(x, (y + (r / 2)), (x + (r / 4)), (y + (r / 4)), 1.0f, 0.0f, 0.0f);
+	drawLine(x - (r / 4), (y + (r / 4)), x, (y + (r / 2)), 1.0f, 0.0f, 0.0f);
 
-			/* Swap front and back buffers */
-			glfwSwapBuffers(window);
+	//check if the cursor is inside the icon area
+	checkIconArea(icon);
+}
 
-			/* Poll for and process events */
-			glfwPollEvents();
+void drawRightICON(Icon icon)
+{
 
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		}
+	//initialize saving icon area's coordinates in array
+	icon.initAreaArray();
 
-		glfwTerminate();
+	//get icon's x,y,r,w info
+	const int x = icon.PullIconX();
+	const int y = icon.PullIconY();
+	const int r = icon.PullIconR();
+	const int w = icon.PullIconW();
 
-		delete[] pixels; // or you may reuse pixels array 
+	//draw outer circle
+	drawCircle(x, y, r, w, 1.0f, 0.0f, 0.0f);
 
-		return 0;
+	//draw right arrow
+	drawLine((x - (r / 2)), y, (x + (r / 2)), y, 1.0f, 0.0f, 0.0f);
+	drawLine((x + (r / 4)), (y + (r / 4)), (x + (r / 2)), y, 1.0f, 0.0f, 0.0f);
+	drawLine((x + (r / 4)), (y - (r / 4)), (x + (r / 2)), y, 1.0f, 0.0f, 0.0f);
+
+	//check if the cursor is inside the icon area
+	checkIconArea(icon);
+}
+
+void drawLeftICON(Icon icon)
+{
+
+	//initialize saving icon area's coordinates in array
+	icon.initAreaArray();
+
+	//get icon's x,y,r,w info
+	const int x = icon.PullIconX();
+	const int y = icon.PullIconY();
+	const int r = icon.PullIconR();
+	const int w = icon.PullIconW();
+
+	//draw outer circle
+	drawCircle(x, y, r, w, 1.0f, 0.0f, 0.0f);
+
+	//draw left arrow
+	drawLine((x - (r / 2)), y, (x + (r / 2)), y, 1.0f, 0.0f, 0.0f);
+	drawLine((x - (r / 2)), y, (x - (r / 4)), (y + (r / 4)), 1.0f, 0.0f, 0.0f);
+	drawLine((x - (r / 2)), y, (x - (r / 4)), (y - (r / 4)), 1.0f, 0.0f, 0.0f);
+
+	//check if the cursor is inside the icon area
+	checkIconArea(icon);
+}
+
+void drawVerticalICON(Icon icon)
+{
+
+	//initialize saving icon area's coordinates in array
+	icon.initAreaArray();
+
+	//get icon's x,y,r,w info
+	const int x = icon.PullIconX();
+	const int y = icon.PullIconY();
+	const int r = icon.PullIconR();
+	const int w = icon.PullIconW();
+
+	//draw outer circle
+	drawCircle(x, y, r, w, 1.0f, 0.0f, 0.0f);
+
+	//draw vertical line
+	drawLine(x, (y - (r / 2)), x, (y + (r / 2)), 1.0f, 0.0f, 0.0f);
+
+	//check if the cursor is inside the icon area
+	checkIconArea(icon);
+}
+
+void drawAICON(Icon icon)
+{
+
+	//initialize saving icon area's coordinates in array
+	icon.initAreaArray();
+
+	//get icon's x,y,r,w info
+	const int x = icon.PullIconX();
+	const int y = icon.PullIconY();
+	const int r = icon.PullIconR();
+	const int w = icon.PullIconW();
+
+	//draw outer circle
+	drawCircle(x, y, r, w, 1.0f, 0.0f, 0.0f);
+
+	//draw A shape
+	drawLine((x - (r / 2)), (y - (r / 2)), x, (y + (r / 2)), 1.0f, 0.0f, 0.0f);
+	drawLine(x, (y + (r / 2)), (x + (r / 2)), (y - (r / 2)), 1.0f, 0.0f, 0.0f);
+	drawLine((x - (r / 4)), y, (x + (r / 4)), y, 1.0f, 0.0f, 0.0f);
+
+	//check if the cursor is inside the icon area
+	checkIconArea(icon);
 }
