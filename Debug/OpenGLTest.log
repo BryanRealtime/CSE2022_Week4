@@ -1,11 +1,4 @@
 ﻿  main.cpp
-c:\program files (x86)\microsoft visual studio 14.0\vc\include\xutility(2810): warning C4996: 'std::_Fill_n': Function call with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct. To disable this warning, use -D_SCL_SECURE_NO_WARNINGS. See documentation on how to use Visual C++ 'Checked Iterators'
-  c:\program files (x86)\microsoft visual studio 14.0\vc\include\xutility(2797): note: see declaration of 'std::_Fill_n'
-  c:\users\3183\documents\visual studio 2015\projects\opengltest\main.cpp(35): note: see reference to function template instantiation '_OutIt std::fill_n<float*,int,float>(_OutIt,_Diff,const _Ty &)' being compiled
-          with
-          [
-              _OutIt=float *,
-              _Diff=int,
-              _Ty=float
-          ]
-  OpenGLTest.vcxproj -> C:\Users\3183\Documents\Visual Studio 2015\Projects\OpenGLTest\Debug\OpenGLTest.exe
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+  OpenGLTest.vcxproj -> C:\Users\Bernium\Documents\Visual Studio 2015\Projects\CSE2022_Week4\Debug\OpenGLTest.exe
+  OpenGLTest.vcxproj -> C:\Users\Bernium\Documents\Visual Studio 2015\Projects\CSE2022_Week4\Debug\OpenGLTest.pdb (Full PDB)

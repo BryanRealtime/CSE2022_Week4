@@ -5,3 +5,5 @@
 3. All directories are stored as relative paths in project options.
 
 4. Please Check the x86 option in VISUAL STUDIO 2015
+
+5. Draw.h contains essential resources
