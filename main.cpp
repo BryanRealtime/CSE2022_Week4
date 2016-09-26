@@ -5,8 +5,10 @@
 #include <chrono>         // std::chrono::seconds
 #include "math.h"
 
-const int width = 640;
-const int height = 480;
+const int width = 1024;
+const int height = 768;
+
+double x_pos, y_pos;
 
 float* pixels = new float[width*height * 3];
 
@@ -51,107 +53,139 @@ void drawOnPixelBuffer()
 	//TODO: try moving object
 }
 
-int main(void)
+//w is the width of the circle'outer shell
+void drawCircle(const int x1, const int y1, const int r1, const int w)
 {
-	GLFWwindow* window;
+	for (int a = 0; a < width; a++)
 
-	/* Initialize the library */
-	if (!glfwInit())
-		return -1;
-
-	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(width, height, "Hello World", NULL, NULL);
-	if (!window)
 	{
-		glfwTerminate();
-		return -1;
-	}
 
-	/* Make the window's context current */
-	glfwMakeContextCurrent(window);
-	glClearColor(1, 1, 1, 1); // while background
-
-	/* Loop until the user closes the window */
-	while (!glfwWindowShouldClose(window))
-	{
-		/* Render here */
-		//glClear(GL_COLOR_BUFFER_BIT);
-
-		// thicker line
-		drawOnPixelBuffer();
-		for (int i = 0; i < 20; i++) {
-			drawLine(100, 400 + i, 200, 400 + i, 1.0f, 0.0f, 0.0f);
-		}
-
-		// square
-		drawLine(300, 400, 400, 400, 1.0f, 0.0f, 0.0f);
-		drawLine(300, 400, 300, 500, 1.0f, 0.0f, 0.0f);
-		drawLine(300, 500, 400, 500, 1.0f, 0.0f, 0.0f);
-		drawLine(400, 400, 400, 500, 1.0f, 0.0f, 0.0f);
-
-		// square(filled with a non-white color)
-		for (int j = 400; j < 500; j++) {
-			drawLine(500, j, 600, j, 1.0f, 0.0f, 0.0f);
-		}
-
-		// triangle
-		drawLine(100, 200, 200, 200, 1.0f, 0.0f, 0.0f);
-		for (int i = 0; i < 3; i++) {
-			drawLine(100, 200 + i, 150, 300 + i, 1.0f, 0.0f, 0.0f);
-			drawLine(150, 300 + i, 200, 200 + i, 1.0f, 0.0f, 0.0f);
-		}
-
-		//Pentagon
-		drawLine(320, 200, 370, 200, 1.0f, 0.0f, 0.0f);
-		for (int i = 0; i < 2; i++) {
-			drawLine(290, 240 + i, 320, 200 + i, 1.0f, 0.0f, 0.0f);
-			drawLine(290, 240 + i, 340, 280 + i, 1.0f, 0.0f, 0.0f);
-			drawLine(340, 280 + i, 390, 240 + i, 1.0f, 0.0f, 0.0f);
-			drawLine(370, 200 + i, 390, 240 + i, 1.0f, 0.0f, 0.0f);
-		}
-
-		for (int a = 0; a < width; a++)
+		for (int b = 0; b < height; b++)
 
 		{
 
-			for (int b = 0; b < height; b++)
+			const int c1 = x1, c2 = y1;
 
-			{
+			const int r = r1;
 
-				const int c1 = 400, c2 = 70;
+			const int line_width = w;
 
-				const int r = 50;
+			if (sqrt((c1 - a)*(c1 - a) + (c2 - b)*(c2 - b)) <= r && sqrt((c1 - a)*(c1 - a) + (c2 - b)*(c2 - b)) >= r - line_width)
 
-				if (sqrt((c1 - a)*(c1 - a) + (c2 - b)*(c2 - b)) < r)
-
-					drawPixel(a, b, 1.0f, 0.0f, 0.0f);
-
-				if (sqrt((400 - a)*(400 - a) + (70 - b)*(70 - b)) < 48)
-
-					drawPixel(a, b, 1.0f, 1.0f, 1.0f);
-
-			}
+				drawPixel(a, b, 1.0f, 0.0f, 0.0f);
 
 		}
 
-		//TODO: RGB struct
-		//Make a pixel drawing function
-		//Make a line drawing function
-
-		glDrawPixels(width, height, GL_RGB, GL_FLOAT, pixels);
-
-		/* Swap front and back buffers */
-		glfwSwapBuffers(window);
-
-		/* Poll for and process events */
-		glfwPollEvents();
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
+}
 
-	glfwTerminate();
+bool IsCursorInIcon(GLFWwindow *window)
+{
+	glfwGetCursorPos(window, &x_pos, &y_pos);
+	//DrawCircle 활용하여 범위 계산해서 true 이면 색변경 , else false
+}
 
-	delete[] pixels; // or you may reuse pixels array 
+void icon_1()
+{
+		drawCircle(100, 150, 50, 3);
+		for (int i = 0; i < 8; i++) {
+			drawLine(75 - i,  115+ i, 135 - i, 170 + i, 1.0f, 0.0f, 0.0f);
+			
+		}
 
-	return 0;
+
+}
+
+
+
+	int main(void)
+	{
+		GLFWwindow* window;
+
+		/* Initialize the library */
+		if (!glfwInit())
+			return -1;
+
+		/* Create a windowed mode window and its OpenGL context */
+		window = glfwCreateWindow(width, height, "Hello World", NULL, NULL);
+		if (!window)
+		{
+			glfwTerminate();
+			return -1;
+		}
+
+		/* Make the window's context current */
+		glfwMakeContextCurrent(window);
+		glClearColor(1, 1, 1, 1); // while background
+
+		/* Loop until the user closes the window */
+		while (!glfwWindowShouldClose(window))
+		{
+			/* Render here */
+			//glClear(GL_COLOR_BUFFER_BIT);
+
+			drawOnPixelBuffer();
+
+
+			icon_1();
+
+			/*
+			// thicker line
+			for (int i = 0; i < 10; i++) {
+				drawLine(100-i, 400 + i, 200-i, 400 + i, 1.0f, 0.0f, 0.0f);
+			}
+
+
+
+			// square
+			drawLine(300, 400, 400, 400, 1.0f, 0.0f, 0.0f);
+			drawLine(300, 400, 300, 500, 1.0f, 0.0f, 0.0f);
+			drawLine(300, 500, 400, 500, 1.0f, 0.0f, 0.0f);
+			drawLine(400, 400, 400, 500, 1.0f, 0.0f, 0.0f);
+
+
+			// square(filled with a non-white color)
+			for (int j = 400; j < 500; j++) {
+				drawLine(500, j, 600, j, 1.0f, 0.0f, 0.0f);
+			}
+
+			// triangle
+			drawLine(100, 200, 200, 200, 1.0f, 0.0f, 0.0f);
+			for (int i = 0; i < 3; i++) {
+				drawLine(100, 200 + i, 150, 300 + i, 1.0f, 0.0f, 0.0f);
+				drawLine(150, 300 + i, 200, 200 + i, 1.0f, 0.0f, 0.0f);
+			}
+
+			//Pentagon
+			drawLine(320, 200, 370, 200, 1.0f, 0.0f, 0.0f);
+			for (int i = 0; i < 2; i++) {
+				drawLine(290, 240 + i, 320, 200 + i, 1.0f, 0.0f, 0.0f);
+				drawLine(290, 240 + i, 340, 280 + i, 1.0f, 0.0f, 0.0f);
+				drawLine(340, 280 + i, 390, 240 + i, 1.0f, 0.0f, 0.0f);
+				drawLine(370, 200 + i, 390, 240 + i, 1.0f, 0.0f, 0.0f);
+			}
+
+			*/
+
+
+			//TODO: RGB struct
+			//Make a pixel drawing function
+			//Make a line drawing function
+
+			glDrawPixels(width, height, GL_RGB, GL_FLOAT, pixels);
+
+			/* Swap front and back buffers */
+			glfwSwapBuffers(window);
+
+			/* Poll for and process events */
+			glfwPollEvents();
+
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		}
+
+		glfwTerminate();
+
+		delete[] pixels; // or you may reuse pixels array 
+
+		return 0;
 }
