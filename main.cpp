@@ -16,28 +16,15 @@ int main(void)
 		return -1;
 	}
 
-	//cursor position callback
+	
+	//cursor position callback not used.
 	//glfwSetCursorPosCallback(window, cursorPositionCallBack);
 
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
 	glClearColor(1, 1, 1, 1); // while background
 
-	//make Icon and set Coordinates
-	Icon line, X, circ, squa, A;
-	Icon up, down, right, left, vert;
-
-	line.SetIconCoordinates(100, 650, 50, 3);
-	circ.SetIconCoordinates(250, 650, 50, 3);
-	squa.SetIconCoordinates(400, 650, 50, 3);
-	X.SetIconCoordinates(550, 650, 50, 3);
-	A.SetIconCoordinates(700, 650, 50, 3);
-
-	up.SetIconCoordinates(100, 450, 50, 3);
-	down.SetIconCoordinates(250, 450, 50, 3);
-	right.SetIconCoordinates(400, 450, 50, 3);
-	left.SetIconCoordinates(550, 450, 50, 3);
-	vert.SetIconCoordinates(700, 450, 50, 3);
+	
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
@@ -49,31 +36,11 @@ int main(void)
 
 		drawOnPixelBuffer();
 
-
-		//draw icons
-		//first top row
-		drawLineICON(line);
-		drawCirclularICON(circ);
-		drawSquareICON(squa);
-		drawXICON(X);
-		drawVerticalICON(vert);
-		
-
-		//second bottom row
-		drawDownICON(down);
-		drawUpICON(up);
-		drawRightICON(right);
-		drawLeftICON(left);
-		drawAICON(A);
-
-
 		glDrawPixels(width, height, GL_RGB, GL_FLOAT, pixels);
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
 		/* Poll for and process events */
 		glfwPollEvents();
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 
 	glfwTerminate();
@@ -100,7 +67,7 @@ void Icon::initAreaArray()
 			const int _r = c_r;
 			const int _w = c_w;
 
-			//if in circle,
+			//if in circle area,
 			if (sqrt((_x - a)*(_x - a) + (_y - b)*(_y - b)) <= _r)
 			{
 				//save the coordinates
@@ -205,18 +172,35 @@ void drawOnPixelBuffer()
 	//std::memset(pixels, 1.0f, sizeof(float)*width*height * 3); // doesn't work
 	std::fill_n(pixels, width*height * 3, 1.0f);	// white background
 
-													//for (int i = 0; i<width*height; i++) {
-													//	pixels[i * 3 + 0] = 1.0f; // red 
-													//	pixels[i * 3 + 1] = 1.0f; // green
-													//	pixels[i * 3 + 2] = 1.0f; // blue
-													//}
 
-	const int i = rand() % width, j = rand() % height;
-	drawPixel(i, j, 0.0f, 0.0f, 0.0f);
+	line.SetIconCoordinates(100, 650, 50, 3);
+	circ.SetIconCoordinates(250, 650, 50, 3);
+	squa.SetIconCoordinates(400, 650, 50, 3);
+	X.SetIconCoordinates(550, 650, 50, 3);
+	A.SetIconCoordinates(700, 650, 50, 3);
 
-	// drawing a line
-	//TODO: anti-aliasing
-	//TODO: try moving object
+	up.SetIconCoordinates(100, 450, 50, 3);
+	down.SetIconCoordinates(250, 450, 50, 3);
+	right.SetIconCoordinates(400, 450, 50, 3);
+	left.SetIconCoordinates(550, 450, 50, 3);
+	vert.SetIconCoordinates(700, 450, 50, 3);
+
+
+	//draw icons
+	//first top row
+	drawLineICON(line);
+	drawCirclularICON(circ);
+	drawSquareICON(squa);
+	drawXICON(X);
+	drawVerticalICON(vert);
+
+
+	//second bottom row
+	drawDownICON(down);
+	drawUpICON(up);
+	drawRightICON(right);
+	drawLeftICON(left);
+	drawAICON(A);
 }
 
 //w is the width of the circle'outer shell
@@ -226,14 +210,10 @@ void drawCircle(const int x, const int y, const int r, const int w, const float 
 	{
 		for (int b = 0; b < height; b++)
 		{
-
-			const int _x = x, _y = y;
-			const int _r = r;
-			const int _w = w;
-
-			if (sqrt((_x - a)*(_x - a) + (_y - b)*(_y - b)) <= _r)
+			
+			if (sqrt((x - a)*(x - a) + (y - b)*(y - b)) <= r)
 			{
-				if (sqrt((_x - a)*(_x - a) + (_y - b)*(_y - b)) >= _r - _w)
+				if (sqrt((x - a)*(x - a) + (y - b)*(y - b)) >= r - w)
 					drawPixel(a, b, red, green, blue);
 			}
 		}
