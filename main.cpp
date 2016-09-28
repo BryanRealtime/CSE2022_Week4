@@ -17,6 +17,11 @@ int main(void)
 	}
 
 	
+	//get cursor position
+	glfwGetCursorPos(window, &cursor_x, &cursor_y);
+	cursor_y = height - cursor_y; // this is because GetCursorPos's y coordinates is inverted.
+	
+	
 	//cursor position callback not used.
 	//glfwSetCursorPosCallback(window, cursorPositionCallBack);
 
@@ -29,10 +34,6 @@ int main(void)
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
-
-		//get cursor position
-		glfwGetCursorPos(window, &cursor_x, &cursor_y);
-		cursor_y = height - cursor_y; // this is because GetCursorPos's y coordinates is inverted.
 
 		drawOnPixelBuffer();
 
