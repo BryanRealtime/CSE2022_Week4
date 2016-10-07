@@ -6,4 +6,4 @@
 
 4. Please Check the x86 option in VISUAL STUDIO 2015
 
-5. Draw.h contains essential resources
+5. draw.h contains essential resources
